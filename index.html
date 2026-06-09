@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dashboard</title>
 
 <style>
@@ -10,6 +10,12 @@
         margin: 0;
         font-family: sans-serif;
         background: #f5f5f5;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    /* 入力時のズーム防止 */
+    input, textarea, button {
+        font-size: 16px;
     }
 
     /* タブ */
@@ -21,11 +27,12 @@
         background: #fff;
         border-top: 1px solid #ccc;
         z-index: 5;
+        height: 60px;
     }
     .tab {
         flex: 1;
         text-align: center;
-        padding: 12px 0;
+        padding: 18px 0;
         cursor: pointer;
     }
     .tab.active {
@@ -36,7 +43,7 @@
     .page {
         display: none;
         padding: 16px;
-        padding-bottom: 80px;
+        padding-bottom: 100px;
     }
     .page.active {
         display: block;
@@ -46,14 +53,14 @@
     #calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
+        gap: 8px;
         margin-top: 10px;
     }
     .day {
         background: #fff;
-        padding: 10px;
+        padding: 14px 0;
         text-align: center;
-        border-radius: 6px;
+        border-radius: 8px;
         border: 1px solid #ddd;
         cursor: pointer;
     }
@@ -75,10 +82,10 @@
 
     textarea {
         width: 100%;
-        height: 120px;
+        height: 140px;
         margin-top: 10px;
-        padding: 10px;
-        border-radius: 6px;
+        padding: 12px;
+        border-radius: 8px;
         border: 1px solid #ccc;
         resize: none;
     }
@@ -86,9 +93,9 @@
     /* リンク */
     .link-item {
         background: #fff;
-        padding: 12px;
-        margin-bottom: 10px;
-        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 12px;
+        border-radius: 8px;
         border: 1px solid #ddd;
         display: flex;
         justify-content: space-between;
@@ -99,18 +106,19 @@
     .img-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 14px;
     }
     .img-box {
         background: #fff;
-        padding: 10px;
-        border-radius: 6px;
+        padding: 12px;
+        border-radius: 8px;
         border: 1px solid #ddd;
         text-align: center;
     }
     .img-box img {
         width: 100%;
-        border-radius: 6px;
+        border-radius: 8px;
+        margin-bottom: 8px;
     }
 
     /* モーダル（スマホ完全対応） */
@@ -128,22 +136,23 @@
         background:#fff;
         margin:auto;
         padding:20px;
-        border-radius:8px;
+        border-radius:10px;
         width:90%;
         max-width:350px;
+        text-align:center;
     }
     #img-preview {
         width:100%;
         height:auto;
-        border-radius:6px;
-        margin-bottom:10px;
+        border-radius:8px;
+        margin-bottom:12px;
     }
     .modal-btn {
         width:100%;
-        padding:12px;
-        margin-top:8px;
+        padding:14px;
+        margin-top:10px;
         border:none;
-        border-radius:6px;
+        border-radius:8px;
         font-size:16px;
         cursor:pointer;
     }
@@ -162,9 +171,9 @@
 <div id="page-schedule" class="page active">
     <h2>予定</h2>
 
-    <div style="display:flex; justify-content:space-between;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
         <button onclick="changeMonth(-1)">←</button>
-        <div id="calendar-title"></div>
+        <div id="calendar-title" style="font-size:18px; font-weight:bold;"></div>
         <button onclick="changeMonth(1)">→</button>
     </div>
 
@@ -178,37 +187,37 @@
 <div id="page-links" class="page">
     <h2>リンク集</h2>
 
-    <input id="link-search" placeholder="検索…" oninput="loadLinks()" style="width:100%; padding:8px; margin-bottom:10px;">
+    <input id="link-search" placeholder="検索…" oninput="loadLinks()" style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px; border:1px solid #ccc;">
 
     <div id="link-list"></div>
 
-    <input id="link-name" placeholder="名前" style="width:48%; padding:8px;">
-    <input id="link-url" placeholder="URL" style="width:48%; padding:8px;">
-    <button onclick="addLink()">追加</button>
+    <input id="link-name" placeholder="名前" style="width:48%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+    <input id="link-url" placeholder="URL" style="width:48%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+    <button onclick="addLink()" style="margin-top:10px; padding:12px; width:100%;">追加</button>
 
-    <hr>
+    <hr style="margin:20px 0;">
 
-    <button onclick="pasteURL()" style="width:100%; padding:10px;">コピーしたURLを追加</button>
+    <button onclick="pasteURL()" style="width:100%; padding:14px;">コピーしたURLを追加</button>
 </div>
 
 <!-- 画像 -->
 <div id="page-images" class="page">
     <h2>画像ストック</h2>
 
-    <button onclick="document.getElementById('img-input').click()" style="padding:10px; width:100%;">画像を追加</button>
+    <button onclick="document.getElementById('img-input').click()" style="padding:14px; width:100%; border-radius:8px;">画像を追加</button>
     <input type="file" id="img-input" accept="image/*" style="display:none;">
 
-    <input id="img-search" placeholder="画像検索…" oninput="loadImages()" style="width:100%; padding:8px; margin:10px 0;">
+    <input id="img-search" placeholder="画像検索…" oninput="loadImages()" style="width:100%; padding:10px; margin:14px 0; border-radius:8px; border:1px solid #ccc;">
 
     <div id="img-grid" class="img-grid"></div>
 </div>
 
-<!-- 画像追加モーダル（スマホ対応） -->
+<!-- 画像追加モーダル -->
 <div id="img-modal">
     <div id="img-modal-content">
         <h3>画像を追加</h3>
         <img id="img-preview">
-        <input id="img-name-input" placeholder="名前を入力" style="width:100%; padding:10px; margin-bottom:10px;">
+        <input id="img-name-input" placeholder="名前を入力" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; margin-bottom:12px;">
         <button class="modal-btn save-btn" onclick="saveImage()">保存</button>
         <button class="modal-btn cancel-btn" onclick="closeImgModal()">キャンセル</button>
     </div>
