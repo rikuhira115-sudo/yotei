@@ -231,6 +231,25 @@
 </div>
 
 <script>
+/* IndexedDB 初期化 */
+let db;
+const request = indexedDB.open("imageDB", 1);
+
+request.onupgradeneeded = function (event) {
+    db = event.target.result;
+    const store = db.createObjectStore("images", { keyPath: "id" });
+    store.createIndex("name", "name", { unique: false });
+};
+
+request.onsuccess = function (event) {
+    db = event.target.result;
+    loadImages();
+};
+
+request.onerror = function () {
+    alert("IndexedDB の初期化に失敗しました");
+};
+
 /* ページ切り替え */
 function switchPage(page, tab) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -355,7 +374,7 @@ async function pasteURL() {
     }
 }
 
-/* 画像（スマホ対応） */
+/* 画像（IndexedDB） */
 let tempImageData = null;
 
 document.getElementById("img-input").onchange = function () {
@@ -378,17 +397,19 @@ function saveImage() {
         return;
     }
 
-    const list = JSON.parse(localStorage.getItem("images") || "[]");
-    list.push({
+    const tx = db.transaction("images", "readwrite");
+    const store = tx.objectStore("images");
+
+    store.add({
         id: Date.now(),
         name,
         src: tempImageData
     });
 
-    localStorage.setItem("images", JSON.stringify(list));
-
-    closeImgModal();
-    loadImages();
+    tx.oncomplete = () => {
+        closeImgModal();
+        loadImages();
+    };
 }
 
 function closeImgModal() {
@@ -399,45 +420,52 @@ function closeImgModal() {
 
 function loadImages() {
     const keyword = document.getElementById("img-search").value.toLowerCase();
-    const list = JSON.parse(localStorage.getItem("images") || "[]");
     const grid = document.getElementById("img-grid");
     grid.innerHTML = "";
 
-    list
-        .filter(item => item.name.toLowerCase().includes(keyword))
-        .forEach(item => {
-            grid.innerHTML += `
-                <div class="img-box">
-                    <img src="${item.src}">
-                    <div>${item.name}</div>
-                    <button onclick="editImageName(${item.id})">名前変更</button>
-                    <button onclick="deleteImage(${item.id})">削除</button>
-                </div>
-            `;
-        });
+    const tx = db.transaction("images", "readonly");
+    const store = tx.objectStore("images");
+
+    store.getAll().onsuccess = function (event) {
+        const list = event.target.result;
+
+        list
+            .filter(item => item.name.toLowerCase().includes(keyword))
+            .forEach(item => {
+                grid.innerHTML += `
+                    <div class="img-box">
+                        <img src="${item.src}">
+                        <div>${item.name}</div>
+                        <button onclick="editImageName(${item.id})">名前変更</button>
+                        <button onclick="deleteImage(${item.id})">削除</button>
+                    </div>
+                `;
+            });
+    };
 }
 
 function editImageName(id) {
-    const list = JSON.parse(localStorage.getItem("images") || "[]");
-    const img = list.find(i => i.id === id);
-    if (!img) return;
-
-    const newName = prompt("新しい名前を入力してください", img.name);
+    const newName = prompt("新しい名前を入力してください");
     if (!newName) return;
 
-    img.name = newName;
-    localStorage.setItem("images", JSON.stringify(list));
-    loadImages();
+    const tx = db.transaction("images", "readwrite");
+    const store = tx.objectStore("images");
+
+    store.get(id).onsuccess = function (event) {
+        const data = event.target.result;
+        data.name = newName;
+        store.put(data);
+    };
+
+    tx.oncomplete = loadImages;
 }
 
 function deleteImage(id) {
-    let list = JSON.parse(localStorage.getItem("images") || "[]");
-    list = list.filter(i => i.id !== id);
-    localStorage.setItem("images", JSON.stringify(list));
-    loadImages();
+    const tx = db.transaction("images", "readwrite");
+    const store = tx.objectStore("images");
+    store.delete(id);
+    tx.oncomplete = loadImages;
 }
-
-loadImages();
 </script>
 
 </body>
